@@ -1,4 +1,6 @@
 *.swp
 *.git
-/tutorial.md
-/.stack-work/
+tutorial.md
+.stack-work/
+src-benchmark/
+src-doctest/
