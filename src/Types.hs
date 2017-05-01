@@ -32,11 +32,19 @@ data Expr a where
 class SquanchyNum a where
   data Number a :: *
 
-  equals      :: Number a -> Number a -> Bool
+
+  equals :: Number a -> Number a -> Bool     
   greaterThan :: Number a -> Number a -> Bool
+  lessThan    :: Number a -> Number a -> Bool
+
+  divide :: Number a -> Number a -> a
 
 instance SquanchyNum Integer where
   data Number Integer = NumInt Integer deriving (Eq,Show)
 
-  equals (NumInt a) (NumInt b) = a == b
+  equals a b = a == b
   greaterThan (NumInt a) (NumInt b) = a > b
+  lessThan (NumInt a) (NumInt b)    = a < b
+
+  divide (NumInt x) (NumInt y) = x `div` y
+  
