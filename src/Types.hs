@@ -8,6 +8,11 @@ data Expr a where
   BoolConst   :: Bool -> Expr Bool
   NumberConst :: Number a -> (Expr (Number a))
 
+  Not         :: Expr Bool -> Expr Bool
+  And         :: Expr Bool -> Expr Bool -> Expr Bool
+  Or          :: Expr Bool -> Expr Bool -> Expr Bool
+  Xor         :: Expr Bool -> Expr Bool -> Expr Bool
+
   Equals      :: (SquanchyNum n) => Expr (Number n)
                                  -> Expr (Number n)
                                  -> Expr Bool
