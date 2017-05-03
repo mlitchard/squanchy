@@ -38,6 +38,7 @@ class SquanchyNum a where
   lessThan    :: Number a -> Number a -> Bool
 
   divide :: Number a -> Number a -> a
+  mul    :: Number a -> Number a -> a
 
 instance SquanchyNum Integer where
   data Number Integer = NumInt Integer deriving (Eq,Show)
