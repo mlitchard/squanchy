@@ -7,6 +7,7 @@ import BasicPrelude
 data Expr a where
   BoolConst   :: Bool -> Expr Bool
   NumberConst :: Number a -> (Expr (Number a))
+
   Equals      :: (SquanchyNum n) => Expr (Number n)
                                  -> Expr (Number n)
                                  -> Expr Bool
@@ -16,6 +17,7 @@ data Expr a where
   LessThan    :: (SquanchyNum n) => Expr (Number n)
                                  -> Expr (Number n)
                                  -> Expr Bool
+
   Div         :: (SquanchyNum n) => Expr (Number n)
                                  -> Expr (Number n)
                                  -> Expr n
@@ -39,6 +41,8 @@ class SquanchyNum a where
 
   divide :: Number a -> Number a -> a
   mul    :: Number a -> Number a -> a
+  sub    :: Number a -> Number a -> a
+  add    :: Number a -> Number a -> a
 
 instance SquanchyNum Integer where
   data Number Integer = NumInt Integer deriving (Eq,Show)
@@ -48,4 +52,6 @@ instance SquanchyNum Integer where
   lessThan (NumInt a) (NumInt b)    = a < b
 
   divide (NumInt x) (NumInt y) = x `div` y
-  
+  mul    (NumInt x) (NumInt y) = x * y
+  sub    (NumInt x) (NumInt y) = x - y
+  add    (NumInt x) (NumInt y) = x + y
