@@ -8,17 +8,23 @@ import Control.Applicative
 import Control.Monad.Except
 import Control.Monad.State
 import Data.Text
+import Data.Typeable
 
 import BasicPrelude
 
 type Var = Text
-type Interp a = Store a -> Either String (a, Store a) 
-type Store a = [(Var, Expr a)]
-type EvalMonad a = ExceptT Text (State (Store a))  
+type Interp = Store -> Either String (Value, Store) 
+type Store = [(Var, Value)]
+type EvalMonad = ExceptT Text (State Store) Value 
 
+data Value where
+  Value :: Typeable a => Expr a -> Value
+
+toExpr :: Typeable a => Value -> Maybe (Expr a)
+toExpr (Value e) = cast e
 
 -- ExceptT Text (State (Store a)) (Expr a)
-class (Num a, Eq a, Ord a) => Divisible a where
+class (Num a, Eq a, Ord a, Typeable a) => Divisible a where
   divide :: a -> a -> a
 
 instance Divisible Int where divide = div
