@@ -17,12 +17,14 @@ eval n@(NumberConst _)    = return $ Value n
 eval s@(SquanchyString _) = return $ Value s
 
 eval (SquanchyVar v) = extractValue v
+
 eval (Not b)   = do
   b' :: Value <- eval b
-  case (cast b' :: Maybe (Expr Bool)) of
+  case (castBool b') of
     Just (BoolConst b''') -> return $ Value $ BoolConst $ not b'''
     Just x                -> eval x
     Nothing          -> error ("Not bool error")
+
 eval (And a b) = do
   a' :: Value <- eval a
   b' :: Value <- eval b
@@ -37,6 +39,7 @@ eval (And a b) = do
       res :: Value
       res = Value $ BoolConst $ a'' && b'' 
   return res 
+
 eval (Or a b)  = do
   a' :: Value <- eval a
   b' :: Value <- eval b
@@ -51,31 +54,27 @@ eval (Or a b)  = do
       res :: Value
       res = Value $  BoolConst $ a'' || b''
   return res  
+
 eval (Xor a b) = do
-                   a' :: Value <- eval a
-                   b' :: Value <- eval b
-                   let a'' :: Bool
-                       (BoolConst a'') = case (cast a' :: Maybe (Expr Bool)) of
+  a' :: Value <- eval a
+  b' :: Value <- eval b
+  let a'' :: Bool
+      (BoolConst a'') = case (castBool a') of
                           Just lb -> lb
-                          Nothing -> error ("Expr Or - value isn't a bool")
-                       b'' :: Bool
-                       (BoolConst b'') = case (cast b' :: Maybe (Expr Bool)) of
+                          Nothing -> error ("Expr Or - l value isn't a bool")
+      b'' :: Bool
+      (BoolConst b'') = case (castBool b') of
                           Just rb -> rb
-                          Nothing -> error ("Expr Or - value isn't a bool")
-                       orRes :: Bool
-                       orRes = a'' || b'' 
-                       andRes :: Bool
-                       andRes = a'' || b'' 
-                       notRes :: Bool
-                       notRes = not andRes
-                       xorRes :: Value
-                       xorRes = Value $ BoolConst $ orRes && notRes
-                   return xorRes 
+                          Nothing -> error ("Expr Or - r value isn't a bool")
+
+      xorRes :: Value
+      xorRes = Value $ BoolConst (a'' /= b'')
+  return xorRes 
 
 eval (Equals p q)      = do
-                           p' :: Value <- eval p
-                           q' :: Value <- eval q
-                           equals p' q'
+  p' :: Value <- eval p
+  q' :: Value <- eval q
+  equals p' q'
 
 eval (GreaterThan p q) = do
                            p' :: Value <- eval p
@@ -109,73 +108,51 @@ eval (Sub p q) = do
 
 -- BUGFIX Dividable TypeClass rendered useless
 squanchySubtract :: Value -> Value -> EvalMonad
-squanchySubtract p q = case (cast p :: Maybe (Expr Int)) of
-  Just (NumberConst p') -> case (cast q :: Maybe (Expr Int)) of
+squanchySubtract p q = case (castInt p) of
+  Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ NumberConst (p' - q')
     _               -> error $ "can't subtract a float from an int"
-  _               -> case (cast p :: Maybe (Expr Float)) of
-    Just (NumberConst p') -> case (cast q :: Maybe (Expr Float)) of
+  _               -> case (castFloat p) of
+    Just (NumberConst p') -> case (castFloat q) of
       Just (NumberConst q') -> return $ Value $ NumberConst ( p' - q')
       _               -> error $ "can't subtract an int from a float"
-  _ -> error "can't do that"
+    _                 -> error $ "can't do subtraction"
 
 squanchyAdd :: Value -> Value -> EvalMonad
-squanchyAdd p q = case (cast p :: Maybe (Expr Int)) of
-  Just (NumberConst p') -> case (cast q :: Maybe (Expr Int)) of
+squanchyAdd p q = case (castInt p) of
+  Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ NumberConst (p' + q')
     _               -> error $ "can't add a float and an int"
-  _                 -> case (cast p :: Maybe (Expr Float)) of
-    Just (NumberConst p') -> case (cast q :: Maybe (Expr Float)) of
+  _                 -> case (castFloat p) of
+    Just (NumberConst p') -> case (castFloat q) of
       Just (NumberConst q') -> return $ Value $ NumberConst ( p' + q')
       _                     -> error $ "can't add a float and an int"
     _                     -> error "can't do that"
 
 
 squanchyDivide :: Value -> Value -> EvalMonad
-squanchyDivide p q = case (cast p :: Maybe (Expr Int)) of
-  Just (NumberConst p') -> case (cast q :: Maybe (Expr Int)) of
+squanchyDivide p q = case (castInt p) of
+  Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ NumberConst (p' `div` q') 
     _                     -> error $ "can't divide a float and an int"
-  _                     -> case (cast p :: Maybe (Expr Float)) of
-    Just (NumberConst p') -> case (cast q :: Maybe (Expr Float)) of
+  _                     -> case (castFloat p) of
+    Just (NumberConst p') -> case (castFloat q) of
       Just (NumberConst q') -> return $ Value $ NumberConst ( p' / q')
       _                     -> error $ "can't divide an int and a float"
     _                     -> error "can't do that"
 
 squanchyMultiply :: Value -> Value -> EvalMonad
-squanchyMultiply p q = case (cast p :: Maybe (Expr Int)) of
-  Just (NumberConst p') -> case (cast q :: Maybe (Expr Int)) of
+squanchyMultiply p q = case (castInt p) of
+  Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ NumberConst (p' * q')
     _                     -> error
                                $ "can't find equality with float and an int"
-  _                     -> case (cast p :: Maybe (Expr Float)) of
-    Just (NumberConst p') -> case (cast q :: Maybe (Expr Float)) of
+  _                     -> case (castFloat p) of
+    Just (NumberConst p') -> case (castFloat q) of
       Just (NumberConst q') -> return $ Value $ NumberConst ( p' * q')
       _                     -> error
                                  $ "can't find equality with an int and a float"
     _                     -> error "can't do that"
-{-
-equals :: Value -> Value -> EvalMonad
-equals p q = case (cast p :: Maybe (Expr Int)) of
-  Just (NumberConst p') -> case (cast q :: Maybe (Expr Int)) of
-    Just (NumberConst q') -> return $ Value $ BoolConst (p' == q')
-    _                     -> error
-                               $ "can't find equality with float and an int"
-  _                     -> case (cast p :: Maybe (Expr Float)) of
-    Just (NumberConst p') -> case (cast q :: Maybe (Expr Float)) of
-      Just (NumberConst q') -> return $ Value $ BoolConst (p' == q')
-      _                     -> error
-                                 $ "can't find equality with an int and a float"
-    _ -> case (cast p :: Maybe (Expr Bool)) of
-           Just (BoolConst p') -> case (cast q :: Maybe (Expr Bool)) of
-             Just (BoolConst q') -> return $ Value $ BoolConst (p' == q')
-             _ -> error $ "nonsensical equality: q not a boolean"
-    _ -> case (cast p :: Maybe (Expr Text)) of
-           Just (SquanchyString p') -> case (cast q :: Maybe (Expr Text)) of
-             Just (SquanchyString q') -> return $ Value $ BoolConst (p' == q')
-             _ -> error $ "Nonsensical equality: q not a Text"
-  Nothing -> error "Nonsensical equality: how did you get this far?"
--}
 
 equals :: Value -> Value -> EvalMonad
 equals p q = case (castInt p) of
