@@ -23,6 +23,16 @@ data Value where
 toExpr :: Typeable a => Value -> Maybe (Expr a)
 toExpr (Value e) = cast e
 
+showValue :: Value -> Maybe String
+showValue v = case (cast v :: Maybe (Expr Bool)) of
+                Just (BoolConst b) -> Just $ show b
+                Nothing -> case (cast v :: Maybe (Expr Text)) of
+                             Just (SquanchyString t) -> Just $ unpack t
+                             Nothing -> case (cast v :: Maybe (Expr Int)) of
+                               Just (NumberConst i) -> Just $ show i
+                               Nothing -> case (cast v :: Maybe (Expr Float)) of
+                                            Just (NumberConst fl) -> Just $ show fl
+                                            Nothing -> Nothing  
 -- ExceptT Text (State (Store a)) (Expr a)
 class (Num a, Eq a, Ord a, Typeable a) => Divisible a where
   divide :: a -> a -> a
