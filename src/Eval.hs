@@ -195,52 +195,55 @@ qNotFloat = "nonsensical comparison, p is float q is not"
 qNotBool :: String
 qNotBool = "nonsensical comparison, p is bool, q is not"
 
+
+nonsense :: String
+nonsense = "Nonsensical comparison: how did you get this far?"
+
 greaterThan :: Value -> Value -> EvalMonad
-greaterThan p q = case (cast p :: Maybe (Expr Int)) of
-  Just (NumberConst p') -> case (cast q :: Maybe (Expr Int)) of
+greaterThan p q = case (castInt p) of
+  Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ BoolConst (p' > q')
     _                     -> error $ "can't compare float and an int"
 
-  _                     -> case (cast p :: Maybe (Expr Float)) of
+  _                     -> case (castFloat p) of
 
-    Just (NumberConst p') -> case (cast q :: Maybe (Expr Float)) of
+    Just (NumberConst p') -> case (castFloat q) of
       Just (NumberConst q') -> return $ Value $ BoolConst (p' > q')
       _                     -> error $ "can't compare int and a float"
 
-    Nothing -> case (cast p :: Maybe (Expr Bool)) of
-      Just (BoolConst p') -> case (cast q :: Maybe (Expr Bool)) of
+    _                     -> case (castBool p) of
+      Just (BoolConst p') -> case (castBool q) of
         Just (BoolConst q') -> return $ Value $ BoolConst (p' > q')
-        Nothing -> error
-                     $ "nonsensical comparison: q not a boolean"
-      Nothing -> case (cast p :: Maybe (Expr Text)) of
-        Just (SquanchyString p') -> case (cast q :: Maybe (Expr Text)) of
+        _                   -> error $ "nonsensical comparison: q not a boolean"
+
+      _                   -> case (castText p) of
+        Just (SquanchyString p') -> case (castText q) of
           Just (SquanchyString q') -> return $ Value $ BoolConst (p' > q')
-          Nothing -> error
-                       $ "Nonsensical comparison: q not a Text"
-        Nothing -> error "Nonsensical comparison: how did you get this far?"
+          _                        -> error
+                                        $ "Nonsensical comparison: q not a Text"
+        _                        -> error nonsense
 
 lessThan :: Value -> Value -> EvalMonad
-lessThan p q = case (cast p :: Maybe (Expr Int)) of
-  Just (NumberConst p') -> case (cast q :: Maybe (Expr Int)) of
+lessThan p q = case (castInt p ) of
+  Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ BoolConst (p' < q')
-    Nothing               -> error
-                               $ "can't compare float and an int"
-  Nothing               -> case (cast p :: Maybe (Expr Float)) of
-    Just (NumberConst p') -> case (cast q :: Maybe (Expr Float)) of
+    _                     -> error $ "can't compare float and an int"
+
+  _                     -> case (castFloat p) of
+    Just (NumberConst p') -> case (castFloat q) of
       Just (NumberConst q') -> return $ Value $ BoolConst (p' < q')
-      Nothing               -> error
-                                 $ "can't compare int and a float"
-    Nothing -> case (cast p :: Maybe (Expr Bool)) of
-      Just (BoolConst p') -> case (cast q :: Maybe (Expr Bool)) of
+      _                     -> error $ "can't compare int and a float"
+
+    _                     -> case (castBool p) of
+      Just (BoolConst p') -> case (castBool q) of
         Just (BoolConst q') -> return $ Value $ BoolConst (p' < q')
-        Nothing -> error
-                     $ "nonsensical comparison: q not a boolean"
-      Nothing -> case (cast p :: Maybe (Expr Text)) of
-        Just (SquanchyString p') -> case (cast q :: Maybe (Expr Text)) of
+        _                   -> error $ "nonsensical comparison: q not a boolean"
+      _                   -> case (castText p) of
+        Just (SquanchyString p') -> case (castText q) of
           Just (SquanchyString q') -> return $ Value $ BoolConst (p' < q')
-          Nothing -> error
-                       $ "Nonsensical comparison: q not a Text"
-        Nothing -> error "Nonsensical comparison: how did you get this far?"
+          _                        -> error
+                                        $ "Nonsensical comparison: q not a Text"
+        _                          -> error nonsense
 
 extractValue :: Text -> EvalMonad
 extractValue v = do
