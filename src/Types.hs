@@ -11,6 +11,8 @@ import Data.Text
 import Data.Typeable
 
 import BasicPrelude
+import Debug.Trace
+
 
 type Var = Text
 type Interp = Store -> Either String (Value, Store) 
@@ -24,15 +26,29 @@ toExpr :: Typeable a => Value -> Maybe (Expr a)
 toExpr (Value e) = cast e
 
 showValue :: Value -> Maybe String
-showValue v = case (cast v :: Maybe (Expr Bool)) of
-                Just (BoolConst b) -> Just $ show b
-                Nothing -> case (cast v :: Maybe (Expr Text)) of
-                             Just (SquanchyString t) -> Just $ unpack t
-                             Nothing -> case (cast v :: Maybe (Expr Int)) of
-                               Just (NumberConst i) -> Just $ show i
-                               Nothing -> case (cast v :: Maybe (Expr Float)) of
-                                            Just (NumberConst fl) -> Just $ show fl
-                                            Nothing -> Nothing  
+showValue (Value v) = case (cast v :: Maybe (Expr Bool)) of
+  Just (BoolConst b) -> Just $ show b
+  Nothing -> case (cast v :: Maybe (Expr Text)) of
+    Just (SquanchyString t) -> Just $ unpack t
+    Nothing -> case (cast v :: Maybe (Expr Int)) of
+      Just (NumberConst i) -> Just $ show i
+      Nothing              -> case (cast v :: Maybe (Expr Float)) of
+        Just (NumberConst fl) -> Just $ show fl
+        Nothing               -> Nothing 
+
+castBool :: (Typeable a) => Expr a -> Maybe (Expr Bool)
+castBool v = cast v
+
+
+castInt :: (Typeable a) => Expr a -> Maybe (Expr Int)
+castInt v = cast v 
+
+castFloat :: (Typeable a) => Expr a -> Maybe (Expr Float)
+castFloat v = cast v
+
+castText :: (Typeable a) => Expr a -> Maybe (Expr Text)
+castText v = cast v
+
 -- ExceptT Text (State (Store a)) (Expr a)
 class (Num a, Eq a, Ord a, Typeable a) => Divisible a where
   divide :: a -> a -> a
