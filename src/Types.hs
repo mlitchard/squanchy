@@ -41,9 +41,9 @@ data Expr a where
   Or          :: Expr Bool -> Expr Bool -> Expr Bool
   Xor         :: Expr Bool -> Expr Bool -> Expr Bool
   
-  Equals      :: (Eq a) =>  Expr a -> Expr a -> Expr Bool
-  GreaterThan :: (Ord a) => Expr a -> Expr a -> Expr Bool
-  LessThan    :: (Ord a) => Expr a -> Expr a -> Expr Bool
+  Equals      :: (Eq a, Typeable a)  => Expr a -> Expr a -> Expr Bool
+  GreaterThan :: (Ord a, Typeable a) => Expr a -> Expr a -> Expr Bool
+  LessThan    :: (Ord a, Typeable a) => Expr a -> Expr a -> Expr Bool
 
   Div         :: (Divisible n) => Expr n -> Expr n -> Expr n
   Mul         :: (Divisible n) => Expr n -> Expr n -> Expr n
