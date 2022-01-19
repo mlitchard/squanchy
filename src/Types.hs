@@ -36,18 +36,18 @@ showValue (Value v) = case (cast v :: Maybe (Expr Bool)) of
         Just (NumberConst fl) -> Just $ show fl
         Nothing               -> Nothing 
 
-castBool :: (Typeable a) => Expr a -> Maybe (Expr Bool)
-castBool v = cast v
+castBool :: Value -> Maybe (Expr Bool)
+castBool (Value a) = cast a
 
 
-castInt :: (Typeable a) => Expr a -> Maybe (Expr Int)
-castInt v = cast v 
+castInt :: Value -> Maybe (Expr Int)
+castInt (Value a) = cast a 
 
-castFloat :: (Typeable a) => Expr a -> Maybe (Expr Float)
-castFloat v = cast v
+castFloat :: Value -> Maybe (Expr Float)
+castFloat (Value a) = cast a
 
-castText :: (Typeable a) => Expr a -> Maybe (Expr Text)
-castText v = cast v
+castText :: Value -> Maybe (Expr Text)
+castText (Value a) = cast a
 
 -- ExceptT Text (State (Store a)) (Expr a)
 class (Num a, Eq a, Ord a, Typeable a) => Divisible a where

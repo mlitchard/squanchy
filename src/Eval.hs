@@ -12,12 +12,8 @@ import Types
 
 
 eval :: Expr a -> EvalMonad 
-eval b@(BoolConst _)      = do
-                              let v = trace "bool called" $ Value b
-                              return v
-eval n@(NumberConst _)    = do
-                              let v = trace "number called" $ Value n
-                              return v
+eval b@(BoolConst _)      = return $ Value b
+eval n@(NumberConst _)    = return $ Value n
 eval s@(SquanchyString _) = return $ Value s
 
 eval (SquanchyVar v) = extractValue v
@@ -28,38 +24,33 @@ eval (Not b)   = do
     Just x                -> eval x
     Nothing          -> error ("Not bool error")
 eval (And a b) = do
-                    a' :: Value <- eval a
-                    b' :: Value <- eval b
-                    let a'' :: Bool
-                        (BoolConst a'') = case (cast a' :: Maybe (Expr Bool)) of
-                                Just x  -> x
-                                Nothing -> 
-                                  error ("Expr And - value isn't a bool")
-                        b'' :: Bool
-                        (BoolConst b'') = case (cast b' :: Maybe (Expr Bool)) of
-                                Just rb -> rb
-                                Nothing ->
-                                  error ("Expr And - value isn't a bool")
-                        res :: Value
-                        res = Value $ BoolConst $ a'' && b'' 
-                    return res 
+  a' :: Value <- eval a
+  b' :: Value <- eval b
+  let a'' :: Bool
+      (BoolConst a'') = case (castBool a') of
+                          Just x  -> x
+                          _       -> error ("Expr And - value isn't a bool")
+      b'' :: Bool
+      (BoolConst b'') = case (castBool b') of
+                          Just rb -> rb
+                          _       -> error ("Expr And - value isn't a bool")
+      res :: Value
+      res = Value $ BoolConst $ a'' && b'' 
+  return res 
 eval (Or a b)  = do
-                   a' :: Value <- eval a
-                   b' :: Value <- eval b
-                   let a'' :: Bool
-                       (BoolConst a'') = case (cast a' :: Maybe (Expr Bool)) of
-                               Just lb -> lb
-                               Nothing ->
-                                 error ("Expr Or - value isn't a bool")
-                       b'' :: Bool
-                       (BoolConst b'') = case (cast b' :: Maybe (Expr Bool)) of
-                               Just rb -> rb
-                               Nothing ->
-                                 error ("Expr Or - value isn't a bool")
-                       res :: Value
-                       res = Value $  BoolConst $ a'' || b''
-                   return res  
-                 -- (||) <$> eval a <*> eval b 
+  a' :: Value <- eval a
+  b' :: Value <- eval b
+  let a'' :: Bool
+      (BoolConst a'') = case (castBool a') of
+                          Just lb -> lb
+                          _       -> error ("Expr Or - value isn't a bool")
+      b'' :: Bool
+      (BoolConst b'') = case (castBool b') of
+                          Just rb -> rb
+                          _       -> error ("Expr Or - value isn't a bool")
+      res :: Value
+      res = Value $  BoolConst $ a'' || b''
+  return res  
 eval (Xor a b) = do
                    a' :: Value <- eval a
                    b' :: Value <- eval b
@@ -187,7 +178,7 @@ equals p q = case (cast p :: Maybe (Expr Int)) of
 -}
 
 equals :: Value -> Value -> EvalMonad
-equals (Value p) (Value q) = case (castInt p) of
+equals p q = case (castInt p) of
   -- p is an int
   Just (NumberConst p') -> case (castInt q ) of
       -- q is an int
