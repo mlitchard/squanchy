@@ -11,13 +11,12 @@ import Data.Text
 import Data.Typeable
 
 import BasicPrelude
-import Debug.Trace
 
 
 type Var = Text
 type Interp = Store -> Either String (Value, Store) 
-type Store = [(Var, Value)]
-type EvalMonad = ExceptT Text (State Store) Value 
+type Store = Map Var Value
+type EvalMonad a = ExceptT Text (State Store) a
 
 data Value where
   Value :: Typeable a => Expr a -> Value
@@ -28,17 +27,25 @@ toExpr (Value e) = cast e
 showValue :: Value -> Maybe String
 showValue (Value v) = case (cast v :: Maybe (Expr Bool)) of
   Just (BoolConst b) -> Just $ show b
-  Nothing -> case (cast v :: Maybe (Expr Text)) of
+  _                  -> case (cast v :: Maybe (Expr Text)) of
     Just (SquanchyString t) -> Just $ unpack t
-    Nothing -> case (cast v :: Maybe (Expr Int)) of
+    _                       -> case (cast v :: Maybe (Expr Int)) of
       Just (NumberConst i) -> Just $ show i
-      Nothing              -> case (cast v :: Maybe (Expr Float)) of
+      _                    -> case (cast v :: Maybe (Expr Float)) of
         Just (NumberConst fl) -> Just $ show fl
-        Nothing               -> Nothing 
+        _                     -> Nothing 
 
 castBool :: Value -> Maybe (Expr Bool)
 castBool (Value a) = cast a
-
+  
+evalBool :: (Typeable a) => Expr a -> Maybe Bool
+evalBool (BoolConst a) = cast a
+evalBool (Not a)       = evalBool a 
+evalBool (And a b)     = (&&) <$> evalBool a <*> evalBool b
+evalBool (Or  a b)     = (||) <$> evalBool a <*> evalBool b
+evalBool (Xor a b)     = (/=) <$> evalBool a <*> evalBool b
+evalBool (Equals a b)  = (==) <$> evalBool a <*> evalBool b
+evalBool _             = Nothing
 
 castInt :: Value -> Maybe (Expr Int)
 castInt (Value a) = cast a 

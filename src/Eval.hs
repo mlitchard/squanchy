@@ -9,9 +9,9 @@ import Data.Text
 import Data.Typeable
 import Debug.Trace
 import Types
+import qualified Data.Map.Lazy as M
 
-
-eval :: Expr a -> EvalMonad 
+eval :: Expr a -> EvalMonad Value
 eval b@(BoolConst _)      = return $ Value b
 eval n@(NumberConst _)    = return $ Value n
 eval s@(SquanchyString _) = return $ Value s
@@ -77,37 +77,38 @@ eval (Equals p q)      = do
   equals p' q'
 
 eval (GreaterThan p q) = do
-                           p' :: Value <- eval p
-                           q' :: Value <- eval q
-                           greaterThan p' q'
+  p' :: Value <- eval p
+  q' :: Value <- eval q
+  greaterThan p' q'
 
 eval (LessThan p q)    = do
-                           p' :: Value <- eval p
-                           q' :: Value <- eval q
-                           lessThan p' q'
+  p' :: Value <- eval p
+  q' :: Value <- eval q
+  lessThan p' q'
 
 eval (Div p q) = do
-                   p' :: Value <- eval p 
-                   q' :: Value <- eval q 
-                   squanchyDivide p' q' 
+  p' :: Value <- eval p 
+  q' :: Value <- eval q 
+  squanchyDivide p' q' 
+
 eval (Mul p q) = do
-                   p' :: Value <- eval p
-                   q' :: Value <- eval q
-                   squanchyMultiply p' q'
+  p' :: Value <- eval p
+  q' :: Value <- eval q
+  squanchyMultiply p' q'
 
 eval (Add p q) = do
-                   p' :: Value <- eval p
-                   q' :: Value <- eval q
-                   squanchyAdd p' q'
+  p' :: Value <- eval p
+  q' :: Value <- eval q
+  squanchyAdd p' q'
 
 eval (Sub p q) = do
-                   p' :: Value <- eval p
-                   q' :: Value <- eval q
-                   squanchySubtract p' q'
+  p' :: Value <- eval p
+  q' :: Value <- eval q
+  squanchySubtract p' q'
 
 
--- BUGFIX Dividable TypeClass rendered useless
-squanchySubtract :: Value -> Value -> EvalMonad
+-- FIXME Dividable TypeClass rendered useless
+squanchySubtract :: Value -> Value -> EvalMonad Value
 squanchySubtract p q = case (castInt p) of
   Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ NumberConst (p' - q')
@@ -118,7 +119,7 @@ squanchySubtract p q = case (castInt p) of
       _               -> error $ "can't subtract an int from a float"
     _                 -> error $ "can't do subtraction"
 
-squanchyAdd :: Value -> Value -> EvalMonad
+squanchyAdd :: Value -> Value -> EvalMonad Value
 squanchyAdd p q = case (castInt p) of
   Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ NumberConst (p' + q')
@@ -130,7 +131,7 @@ squanchyAdd p q = case (castInt p) of
     _                     -> error "can't do that"
 
 
-squanchyDivide :: Value -> Value -> EvalMonad
+squanchyDivide :: Value -> Value -> EvalMonad Value
 squanchyDivide p q = case (castInt p) of
   Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ NumberConst (p' `div` q') 
@@ -141,7 +142,7 @@ squanchyDivide p q = case (castInt p) of
       _                     -> error $ "can't divide an int and a float"
     _                     -> error "can't do that"
 
-squanchyMultiply :: Value -> Value -> EvalMonad
+squanchyMultiply :: Value -> Value -> EvalMonad Value
 squanchyMultiply p q = case (castInt p) of
   Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ NumberConst (p' * q')
@@ -154,7 +155,7 @@ squanchyMultiply p q = case (castInt p) of
                                  $ "can't find equality with an int and a float"
     _                     -> error "can't do that"
 
-equals :: Value -> Value -> EvalMonad
+equals :: Value -> Value -> EvalMonad Value
 equals p q = case (castInt p) of
   -- p is an int
   Just (NumberConst p') -> case (castInt q ) of
@@ -199,7 +200,7 @@ qNotBool = "nonsensical comparison, p is bool, q is not"
 nonsense :: String
 nonsense = "Nonsensical comparison: how did you get this far?"
 
-greaterThan :: Value -> Value -> EvalMonad
+greaterThan :: Value -> Value -> EvalMonad Value
 greaterThan p q = case (castInt p) of
   Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ BoolConst (p' > q')
@@ -223,7 +224,7 @@ greaterThan p q = case (castInt p) of
                                         $ "Nonsensical comparison: q not a Text"
         _                        -> error nonsense
 
-lessThan :: Value -> Value -> EvalMonad
+lessThan :: Value -> Value -> EvalMonad Value
 lessThan p q = case (castInt p ) of
   Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ BoolConst (p' < q')
@@ -245,10 +246,10 @@ lessThan p q = case (castInt p ) of
                                         $ "Nonsensical comparison: q not a Text"
         _                          -> error nonsense
 
-extractValue :: Text -> EvalMonad
+extractValue :: Text -> EvalMonad Value
 extractValue v = do
   store :: Store <- lift get
-  case (lookup v store :: Maybe Value) of
+  case (M.lookup v store :: Maybe Value) of
     Just i -> do
       case (toExpr i :: Maybe (Expr Int)) of
         Just i' -> return $ Value i'

@@ -39,6 +39,7 @@ library
                    , Interpreter
   build-depends:     base >= 4.8 && < 5
                    , basic-prelude
+                   , containers == 0.6.5.1
                    , mtl == 2.2.2 
                    , text == 1.2.4.1
 
