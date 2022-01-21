@@ -120,7 +120,13 @@ squanchySubtract p q = case (castInt p) of
     _                 -> error $ "can't do subtraction"
 
 squanchyAdd :: Value -> Value -> EvalMonad Value
-squanchyAdd p q = case (castInt p) of
+squanchyAdd p q = do
+ putStrLn ("hello add")
+ let showP = pack $ show $ showValue p
+     showQ = pack $ show $ showValue q
+ putStrLn ("p in add is " <> showP)
+ putStrLn ("q in add is " <> showQ)
+ case (castInt p) of
   Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ NumberConst (p' + q')
     _               -> error $ "can't add a float and an int"
@@ -156,7 +162,13 @@ squanchyMultiply p q = case (castInt p) of
     _                     -> error "can't do that"
 
 equals :: Value -> Value -> EvalMonad Value
-equals p q = case (castInt p) of
+equals p q = do
+ liftIO $ putStrLn "hello equals"
+ let showP = pack $ show $ showValue p
+     showQ = pack $ show $ showValue q
+ putStrLn ("p is " <> showP)
+ putStrLn ("q is " <> showQ)
+ case (castInt p) of
   -- p is an int
   Just (NumberConst p') -> case (castInt q ) of
       -- q is an int

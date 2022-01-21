@@ -16,7 +16,7 @@ import BasicPrelude
 type Var = Text
 type Interp = Store -> Either String (Value, Store) 
 type Store = Map Var Value
-type EvalMonad a = ExceptT Text (State Store) a
+type EvalMonad a = ExceptT Text (StateT Store IO) a
 
 data Value where
   Value :: Typeable a => Expr a -> Value
