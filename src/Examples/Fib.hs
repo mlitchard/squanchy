@@ -1,6 +1,5 @@
 module Examples.Fib where
 import Types
-import Eval
 import Statements
 import BasicPrelude
 import qualified Data.Map.Lazy as M
