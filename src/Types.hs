@@ -36,7 +36,7 @@ showValue (Value v) = case (cast v :: Maybe (Expr Bool)) of
 
 castBool :: Value -> Maybe (Expr Bool)
 castBool (Value a) = cast a
-  
+{-  
 evalBool :: (Typeable a) => Expr a -> Maybe Bool
 evalBool (BoolConst a) = cast a
 evalBool (Not a)       = evalBool a 
@@ -45,7 +45,7 @@ evalBool (Or  a b)     = (||) <$> evalBool a <*> evalBool b
 evalBool (Xor a b)     = (/=) <$> evalBool a <*> evalBool b
 evalBool (Equals a b)  = (==) <$> evalBool a <*> evalBool b
 evalBool _             = Nothing
-
+-}
 castInt :: Value -> Maybe (Expr Int)
 castInt (Value a) = cast a 
 
