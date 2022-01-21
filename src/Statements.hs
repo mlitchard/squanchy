@@ -82,7 +82,7 @@ reductionError (Just (Sub _ _)) = "it never reduced the sub"
 reductionError x'' = 
   "While couldn't reduce the boolean value for some reason " 
     ++ (show $ typeOf x'')
-
+{-
 zero :: Value
 zero = Value $ NumberConst (0 :: Int)
 
@@ -116,4 +116,4 @@ fib = Seq
       ]
        
  ]
-
+-}

@@ -37,6 +37,7 @@ library
                    , Types
                    , Statements
                    , Interpreter
+                   , Examples.Fib
   build-depends:     base >= 4.8 && < 5
                    , basic-prelude
                    , containers == 0.6.5.1
