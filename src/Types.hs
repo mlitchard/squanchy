@@ -4,8 +4,7 @@
 {-# LANGUAGE InstanceSigs #-}
 module Types where
 
-import Control.Applicative
-import Control.Monad.Except
+import Control.Monad.Except (ExceptT)
 import Control.Monad.State
 import Data.Text
 import Data.Typeable

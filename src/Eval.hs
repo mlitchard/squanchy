@@ -3,11 +3,7 @@
 module Eval where
 
 import BasicPrelude
-import Control.Monad.State
-import Control.Monad.Except
-import Data.Text
-import Data.Typeable
-import Debug.Trace
+import Control.Monad.State (get)
 import Types
 import qualified Data.Map.Lazy as M
 
@@ -121,11 +117,6 @@ squanchySubtract p q = case (castInt p) of
 
 squanchyAdd :: Value -> Value -> EvalMonad Value
 squanchyAdd p q = do
- putStrLn ("hello add")
- let showP = pack $ show $ showValue p
-     showQ = pack $ show $ showValue q
- putStrLn ("p in add is " <> showP)
- putStrLn ("q in add is " <> showQ)
  case (castInt p) of
   Just (NumberConst p') -> case (castInt q) of
     Just (NumberConst q') -> return $ Value $ NumberConst (p' + q')
@@ -163,11 +154,6 @@ squanchyMultiply p q = case (castInt p) of
 
 equals :: Value -> Value -> EvalMonad Value
 equals p q = do
- liftIO $ putStrLn "hello equals"
- let showP = pack $ show $ showValue p
-     showQ = pack $ show $ showValue q
- putStrLn ("p is " <> showP)
- putStrLn ("q is " <> showQ)
  case (castInt p) of
   -- p is an int
   Just (NumberConst p') -> case (castInt q ) of
