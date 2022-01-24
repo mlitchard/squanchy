@@ -23,29 +23,21 @@ data Value where
 toExpr :: Typeable a => Value -> Maybe (Expr a)
 toExpr (Value e) = cast e
 
-showValue :: Value -> Maybe String
+showValue :: Value -> Maybe Text
 showValue (Value v) = case (cast v :: Maybe (Expr Bool)) of
-  Just (BoolConst b) -> Just $ show b
+  Just (BoolConst b) -> return $ pack $ show b
   _                  -> case (cast v :: Maybe (Expr Text)) of
-    Just (SquanchyString t) -> Just $ unpack t
+    Just (SquanchyString t) -> return $ t
     _                       -> case (cast v :: Maybe (Expr Int)) of
-      Just (NumberConst i) -> Just $ show i
+      Just (NumberConst i) -> return $ pack $ show i
       _                    -> case (cast v :: Maybe (Expr Float)) of
-        Just (NumberConst fl) -> Just $ show fl
+        Just (NumberConst fl) -> return $ pack $ show fl
         _                     -> Nothing 
+
 
 castBool :: Value -> Maybe (Expr Bool)
 castBool (Value a) = cast a
-{-  
-evalBool :: (Typeable a) => Expr a -> Maybe Bool
-evalBool (BoolConst a) = cast a
-evalBool (Not a)       = evalBool a 
-evalBool (And a b)     = (&&) <$> evalBool a <*> evalBool b
-evalBool (Or  a b)     = (||) <$> evalBool a <*> evalBool b
-evalBool (Xor a b)     = (/=) <$> evalBool a <*> evalBool b
-evalBool (Equals a b)  = (==) <$> evalBool a <*> evalBool b
-evalBool _             = Nothing
--}
+
 castInt :: Value -> Maybe (Expr Int)
 castInt (Value a) = cast a 
 
@@ -55,7 +47,7 @@ castFloat (Value a) = cast a
 castText :: Value -> Maybe (Expr Text)
 castText (Value a) = cast a
 
--- ExceptT Text (State (Store a)) (Expr a)
+
 class (Num a, Eq a, Ord a, Typeable a) => Divisible a where
   divide :: a -> a -> a
 
