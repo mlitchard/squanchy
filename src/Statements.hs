@@ -88,13 +88,14 @@ printVal :: Value -> EvalMonad ()
 printVal val = do
   case (castText val) of
     Just (SquanchyVar var) -> printText var
+    Just (SquanchyString var) -> liftIO $ putStrLn var
     _ -> case (castInt val) of
       Just (SquanchyVar var) -> printInt var
       _  -> case (castFloat val) of
         Just (SquanchyVar flt)  -> printFloat flt
         _  -> case (castBool val) of
           Just (SquanchyVar b) -> printBool b
-          _ -> error "Value could not be reduced"
+          _ -> error "Value could not be printed"
 
 
 doStore :: Text -> Value -> EvalMonad ()
