@@ -11,7 +11,20 @@ eval :: Expr a -> EvalMonad Value
 eval b@(BoolConst _)      = return $ Value b
 eval n@(NumberConst _)    = return $ Value n
 eval s@(SquanchyString _) = return $ Value s
+eval (ConcatString p q)   = do
+  redP <- eval p
+  redQ <- eval q
+  let p'' :: Text
+      p'' = case (castText redP) of 
+              Just (SquanchyString p') -> p'
+              _ -> error ("left value - impossible concatination")
+      q'' :: Text
+      q'' = case (castText redQ) of
+              Just (SquanchyString q') -> q'
+              _ -> error ("right value - impossible concatination")
 
+  return $ Value $ SquanchyString (p'' <> q'')
+               
 eval (SquanchyVar v) = extractValue v
 
 eval (Not b)   = do

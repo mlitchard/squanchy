@@ -60,6 +60,8 @@ data Expr a where
   SquanchyString :: Text -> Expr Text
   SquanchyVar    :: Text -> Expr a
 
+  ConcatString :: Expr Text -> Expr Text -> Expr Text
+
   Not         :: Expr Bool -> Expr Bool
   And         :: Expr Bool -> Expr Bool -> Expr Bool
   Or          :: Expr Bool -> Expr Bool -> Expr Bool

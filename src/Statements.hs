@@ -99,37 +99,9 @@ printVal val = do
 
 
 doStore :: Text -> Value -> EvalMonad ()
-doStore var val = do
-  case (castInt val) of
-    Just intExpr -> do
-                      res <- eval intExpr
-                      case (castInt res) of
-                        Just (NumberConst _) -> modify $ M.insert var res
-                        _ -> error "illegal value"
-    Nothing      -> do
-      case (castFloat val) of
-        Just floatExpr -> do
-                            res <- eval floatExpr
-                            case (castFloat res) of     
-                              Just (NumberConst _) -> modify $ M.insert var res
-                              _ -> error "illegal value"
-        Nothing -> case (castBool val) of
-          (Just boolExpr) -> do
-                               res <- eval boolExpr
-                               case (castBool res) of
-                                 Just (BoolConst _) -> modify $ M.insert var res
-                                 _ -> error "illegal value"
-          Nothing         -> do
-            case (castText val) of
-              (Just textExpr) -> do
-                                   res <- eval textExpr
-                                   case (castText res) of
-                                     Just (SquanchyString _) -> 
-                                       modify $ M.insert var res 
-
-                                     _  -> error "illegal value"
-              Nothing -> error "illegal value"                        
-                                   
+doStore var (Value val)  = do
+  res <- eval val
+  modify $ M.insert var res
           
 readBool :: String -> Maybe Bool
 readBool str = readMaybe str
